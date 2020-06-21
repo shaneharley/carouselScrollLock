@@ -36,20 +36,18 @@ section.fullHeight {
                        ".";
 
 }
-
+.carouselItem {
+  padding-bottom: 20vh;
+}
 .fullHeight h1 {
   opacity: 15%;
   transition: all 1s;
-}
-.fullHeight h1:first-of-type {
   padding-top: 45vh;
 }
 .fullHeight h1.active {
   opacity: 100%;
 }
-.carouselItem {
-  padding-bottom: 20vh;
-}
+
 
 section.bigWhite {
   height: 300vh;

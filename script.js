@@ -1,50 +1,75 @@
-let windowHeight = window.innerHeight;
-let moveAmount = windowHeight * .45
-let headingCounter = 1
+//GLOBAL VARIABLES
+/////////////////////////////////////////
+
+//work out what half the screen height is
+let moveAmount = window.innerHeight * .45
+
+//And here I'm saying that we're at heading position 1 at the start
+let currentHeading = 1
+
+//saying that the carousel is currently fixzed
+let carouselFixed = true
+
+//finding items I'm going to call on a lot
+const fixedSection = document.querySelector("section.fullHeight")
+const headings = document.querySelectorAll('.carouselItem h1')
+const numOfHeadings = document.querySelectorAll('.carouselItem h1').length
 
 
-const shiftItem = () => {
-  const headings = document.querySelectorAll('.carouselItem h1')
-  const headingLength = headings.length
+//FUNCTIONS
+/////////////////////////////////////////
 
+//this is the function that loops through each item and slides it up
+const shiftItemUp = () => {
   headings.forEach(heading => {
     heading.style.transform = `translateY(-${moveAmount}px)`
   })
-  headingCounter++
+  currentHeading++
   moveAmount = moveAmount * 2
 }
 
-let carouselFixed = true
-
+//this is the function that runs and unfixes the page
 const unfixPage = () => {
+  //if carouselFixed is true, then make sure we've scrolled to the top of the window and then unfix it
   if (carouselFixed) {
     window.scrollTo(0, 0);
-    const fixedSection = document.querySelector("section.fullHeight")
     fixedSection.style.position = "absolute"
     carouselFixed = false
   }
 }
 
+//this applies the active class to the new heading
 const applyActive = (position) => {
-  let newActiveHeading = document.querySelectorAll('.carouselItem h1')
-  newActiveHeading = newActiveHeading[position]
-  newActiveHeading.classList.add("active")
+  let newActive = document.querySelectorAll('.carouselItem h1')[position]
+  newActive.classList.add("active")
 }
 
+//this removes the active class from the current heading
 const removeActive = (position) => {
-  let currentActiveHeading = document.querySelector('.carouselItem h1.active')
-  currentActiveHeading.classList.remove("active")
+  let currentActive = document.querySelector('.carouselItem h1.active')
+  currentActive.classList.remove("active")
 }
 
-const initialLoad = () => {
-  //this is setting thee first heading 
-  applyActive(0)
+//this is how I shift the carousel
+const moveCarousel = () => {
+
+  if ((currentHeading == numOfHeadings)) {
+    unfixPage()
+  } else {
+    removeActive()
+    applyActive(currentHeading)
+    shiftItemUp()
+  }
 }
 
-let currentPosition = 1
 
 
 
+
+//EVENT LISTENERS
+/////////////////////////////////////////
+
+//this is how I slow down my scroll calls
 const throttle = (functionToRun, wait) => {
   let time = Date.now();
   return () => {
@@ -55,34 +80,36 @@ const throttle = (functionToRun, wait) => {
   }
 }
 
-const moveCarousel = () => {
-  let headingNum = document.querySelectorAll('.carouselItem h1').length
-
-  if ((currentPosition == headingNum)) {
-    unfixPage()
-  } else {
-    removeActive()
-    applyActive(currentPosition)
-    shiftItem()
-    currentPosition++
-  }
-}
-
-
-
-
 window.addEventListener('wheel', throttle(moveCarousel, 1000));
 
-
-
-
-
-
-
-
-
-
 window.addEventListener('load', () => {
-  initialLoad()
+  applyActive(0)
+  createObserver()
 })
+
+
+//SCROLL OBSERVER
+/////////////////////////////////////////
+
+const createObserver = () => {
+  let observer
+
+  let options = {
+    root: null,
+    rootMargin: "0px",
+    threshold: 1
+  }
+
+  observer = new IntersectionObserver(handleIntersect, options)
+  observer.observe(fixedSection)
+}
+
+const handleIntersect = (entries, observer) => {
+  entries.forEach((entry) => {
+    if (entry.intersectionRatio == 1) {
+      fixedSection.style.position = "fixed"
+      console.log("it ran")
+    }
+  })
+}
 
