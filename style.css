@@ -28,26 +28,25 @@ section.fullHeight {
   background: var(--primary-color);
   color: var(--secondary-color);
   padding: 0vw 10vw;
-  display: grid;
-  align-items:center;
-  grid-template-rows: 1fr 100px 1fr;
-  grid-template-areas: "."
-                       "activeHead"
-                       ".";
+}
 
+.carouselWrapper {
+  transition: all 1s;
+  padding-top: 40vh;
 }
-.carouselItem {
-  padding-bottom: 20vh;
-}
+
+
 .fullHeight h1 {
   opacity: 15%;
   transition: all 1s;
-  padding-top: 45vh;
+  padding-bottom: 20vh;
+  transform-origin: center left;
+  transform: scale(0.9);
 }
 .fullHeight h1.active {
   opacity: 100%;
+  transform: scale(1);
 }
-
 
 section.bigWhite {
   height: 300vh;

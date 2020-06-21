@@ -2,7 +2,6 @@
 /////////////////////////////////////////
 
 //work out what half the screen height is
-let moveAmount = window.innerHeight * .45
 
 //And here I'm saying that we're at heading position 1 at the start
 let currentHeading = 1
@@ -14,19 +13,14 @@ let carouselFixed = true
 const fixedSection = document.querySelector("section.fullHeight")
 const headings = document.querySelectorAll('.carouselItem h1')
 const numOfHeadings = document.querySelectorAll('.carouselItem h1').length
+const carouselWrapper = document.querySelector('.carouselWrapper')
 
 
 //FUNCTIONS
 /////////////////////////////////////////
 
 //this is the function that loops through each item and slides it up
-const shiftItemUp = () => {
-  headings.forEach(heading => {
-    heading.style.transform = `translateY(-${moveAmount}px)`
-  })
-  currentHeading++
-  moveAmount = moveAmount * 2
-}
+
 
 //this is the function that runs and unfixes the page
 const unfixPage = () => {
@@ -38,30 +32,60 @@ const unfixPage = () => {
   }
 }
 
-//this applies the active class to the new heading
-const applyActive = (position) => {
-  let newActive = document.querySelectorAll('.carouselItem h1')[position]
-  newActive.classList.add("active")
+let soFarTranslatedY = 0
+
+
+
+const getHeadingActualHeight = (compute) => {
+  let heading = window.getComputedStyle(document.querySelector(compute), null);
+  let height = parseFloat(heading.getPropertyValue("height"));
+  let padding = parseFloat(heading.getPropertyValue("padding-bottom"));
+  heading = height - padding
+  return heading
 }
 
-//this removes the active class from the current heading
-const removeActive = (position) => {
+const calculateComputedBottomPadding = (compute) => {
+  let paddingBottom = parseFloat(window.getComputedStyle(compute).paddingBottom)
+  return paddingBottom
+}
+
+
+const moveCarousel = position => {
+  //this runs my calculateBottomPadding function
+  let paddingBottom = calculateComputedBottomPadding(headings[0])
+
+  //this takes the amount translated so far, adds the bottom padding, AND the height of the heading and applies that to the transform
+  soFarTranslatedY = soFarTranslatedY + paddingBottom + getHeadingActualHeight("h1")
+
+  //this applies the amount to transform
+  carouselWrapper.style.transform = `translateY(-${soFarTranslatedY}px)`
+
+  //increases the counter of currentHeader
+  currentHeading++
+
+
+
+  //add the new active class
+  let newActive = document.querySelectorAll('.carouselItem h1')[position]
+  newActive.classList.add("active")
+
+  //remove the current active
   let currentActive = document.querySelector('.carouselItem h1.active')
   currentActive.classList.remove("active")
 }
 
-//this is how I shift the carousel
-const moveCarousel = () => {
 
+
+//this is how I shift the carousel
+const carousel = () => {
+  //if the position of the current heading is at the same position as the number of headings there are, then we're at the end of the list
   if ((currentHeading == numOfHeadings)) {
     unfixPage()
   } else {
-    removeActive()
-    applyActive(currentHeading)
-    shiftItemUp()
+    //else continue to move the carousel
+    moveCarousel(currentHeading)
   }
 }
-
 
 
 
@@ -80,10 +104,10 @@ const throttle = (functionToRun, wait) => {
   }
 }
 
-window.addEventListener('wheel', throttle(moveCarousel, 1000));
+window.addEventListener('wheel', throttle(carousel, 1000));
 
 window.addEventListener('load', () => {
-  applyActive(0)
+  headings[0].classList.add("active")
   createObserver()
 })
 
