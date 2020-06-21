@@ -36,16 +36,15 @@ section.fullHeight {
                        ".";
 
 }
-.listContainer {
-  margin: 0;
-  height: 100px;
-  grid-area: activeHead
-}
-.listContainer h1 {
+
+.fullHeight h1 {
   opacity: 15%;
   transition: all 1s;
 }
-.listContainer h1.active {
+.fullHeight h1:first-of-type {
+  padding-top: 45vh;
+}
+.fullHeight h1.active {
   opacity: 100%;
 }
 .carouselItem {

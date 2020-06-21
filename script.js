@@ -1,5 +1,5 @@
 let windowHeight = window.innerHeight;
-let moveAmount = windowHeight / 3
+let moveAmount = windowHeight * .45
 let headingCounter = 1
 
 
@@ -14,9 +14,15 @@ const shiftItem = () => {
   moveAmount = moveAmount * 2
 }
 
+let carouselFixed = true
+
 const unfixPage = () => {
-  const fixedSection = document.querySelector("section.fullHeight")
-  fixedSection.style.position = "relative"
+  if (carouselFixed) {
+    window.scrollTo(0, 0);
+    const fixedSection = document.querySelector("section.fullHeight")
+    fixedSection.style.position = "absolute"
+    carouselFixed = false
+  }
 }
 
 const applyActive = (position) => {
@@ -39,11 +45,11 @@ let currentPosition = 1
 
 
 
-const throttle = (fn, wait) => {
+const throttle = (functionToRun, wait) => {
   let time = Date.now();
   return () => {
     if ((time + wait - Date.now()) < 0) {
-      fn();
+      functionToRun();
       time = Date.now();
     }
   }
