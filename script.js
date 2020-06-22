@@ -4,10 +4,11 @@
 //work out what half the screen height is
 
 //And here I'm saying that we're at heading position 1 at the start
-let currentHeading = 1
+let currentHeading = 0
 
-//saying that the carousel is currently fixzed
+//saying that the carousel is currently fixed
 let carouselFixed = true
+let scrollingDown = true
 
 //finding items I'm going to call on a lot
 const fixedSection = document.querySelector("section.fullHeight")
@@ -21,19 +22,7 @@ const carouselWrapper = document.querySelector('.carouselWrapper')
 
 //this is the function that loops through each item and slides it up
 
-
-//this is the function that runs and unfixes the page
-const unfixPage = () => {
-  //if carouselFixed is true, then make sure we've scrolled to the top of the window and then unfix it
-  if (carouselFixed) {
-    window.scrollTo(0, 0);
-    fixedSection.style.position = "absolute"
-    carouselFixed = false
-  }
-}
-
 let soFarTranslatedY = 0
-
 
 
 const getHeadingActualHeight = (compute) => {
@@ -50,42 +39,83 @@ const calculateComputedBottomPadding = (compute) => {
 }
 
 
-const moveCarousel = position => {
+const moveCarousel = (position) => {
   //this runs my calculateBottomPadding function
   let paddingBottom = calculateComputedBottomPadding(headings[0])
 
   //this takes the amount translated so far, adds the bottom padding, AND the height of the heading and applies that to the transform
-  soFarTranslatedY = soFarTranslatedY + paddingBottom + getHeadingActualHeight("h1")
 
-  //this applies the amount to transform
-  carouselWrapper.style.transform = `translateY(-${soFarTranslatedY}px)`
+  if (scrollingDown == true) {
 
-  //increases the counter of currentHeader
-  currentHeading++
+    soFarTranslatedY = soFarTranslatedY + paddingBottom + getHeadingActualHeight("h1")
+
+    //this applies the amount to transform
+    carouselWrapper.style.transform = `translateY(-${soFarTranslatedY}px)`
+
+    //add the new active class
+    let newActive = document.querySelectorAll('.carouselItem h1')[position]
+    newActive.classList.add("active")
+
+    //remove the current active
+    let currentActive = document.querySelector('.carouselItem h1.active')
+    currentActive.classList.remove("active")
+
+  }
+
+  else {
+    console.log("move Carousel ran")
+
+    soFarTranslatedY = soFarTranslatedY - paddingBottom - getHeadingActualHeight("h1")
+
+
+    //this applies the amount to transform
+    carouselWrapper.style.transform = `translateY(-${soFarTranslatedY}px)`
+
+    //remove the current active
+    let currentActive = document.querySelector('.carouselItem h1.active')
+    currentActive.classList.remove("active")
+
+    //add the new active class
+    let newActive = document.querySelectorAll('.carouselItem h1')[position]
+    newActive.classList.add("active")
+
+  }
 
 
 
-  //add the new active class
-  let newActive = document.querySelectorAll('.carouselItem h1')[position]
-  newActive.classList.add("active")
+}
 
-  //remove the current active
-  let currentActive = document.querySelector('.carouselItem h1.active')
-  currentActive.classList.remove("active")
+const toggleCarousel = () => {
+  if (carouselFixed && scrollingDown == true) {
+    window.scrollTo(0, 0);
+    fixedSection.classList.toggle("fixed")
+    carouselFixed = false
+
+  } else if (carouselFixed == false && scrollingDown == false) {
+    fixedSection.classList.toggle("fixed")
+    carouselFixed = true
+  }
 }
 
 
 
 //this is how I shift the carousel
 const carousel = () => {
-  //if the position of the current heading is at the same position as the number of headings there are, then we're at the end of the list
-  if ((currentHeading == numOfHeadings)) {
-    unfixPage()
-  } else {
-    //else continue to move the carousel
+  // if the position of the current heading is at the same position as the number of headings there are, then we're at the end of the list
+  if ((currentHeading == numOfHeadings - 1 && scrollingDown && carouselFixed)) {
+    toggleCarousel()
+  }
+  else if (scrollingDown == true && carouselFixed == true) {
+    currentHeading++
+    moveCarousel(currentHeading)
+  } else if (scrollingDown == false && currentHeading != 0 && carouselFixed) {
+    currentHeading = currentHeading - 1
     moveCarousel(currentHeading)
   }
+  // }
 }
+
+
 
 
 
@@ -104,16 +134,36 @@ const throttle = (functionToRun, wait) => {
   }
 }
 
+
+window.addEventListener('wheel', (event) => {
+  let delta = event.deltaY
+
+  if (delta > 1) {
+    scrollingDown = true
+    console.log("scrolling down")
+  } else if (delta < 0) {
+    scrollingDown = false
+    console.log("scrolling up")
+  }
+})
+
 window.addEventListener('wheel', throttle(carousel, 1000));
 
+
+
 window.addEventListener('load', () => {
-  headings[0].classList.add("active")
   createObserver()
 })
 
 
-//SCROLL OBSERVER
-/////////////////////////////////////////
+
+
+
+
+
+
+// SCROLL OBSERVER
+///////////////////////////////////////
 
 const createObserver = () => {
   let observer
@@ -131,8 +181,8 @@ const createObserver = () => {
 const handleIntersect = (entries, observer) => {
   entries.forEach((entry) => {
     if (entry.intersectionRatio == 1) {
-      fixedSection.style.position = "fixed"
-      console.log("it ran")
+      carouselFixed = true
+      fixedSection.classList.add("fixed")
     }
   })
 }

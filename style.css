@@ -22,12 +22,15 @@ h1 {
 }
 
 section.fullHeight {
-  position: fixed;
+
   width:100vw;
   height: 100vh;
   background: var(--primary-color);
   color: var(--secondary-color);
   padding: 0vw 10vw;
+}
+.fixed {
+  position: fixed;
 }
 
 .carouselWrapper {
