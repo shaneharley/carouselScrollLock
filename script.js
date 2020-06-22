@@ -147,7 +147,7 @@ window.addEventListener('wheel', (event) => {
   }
 })
 
-window.addEventListener('wheel', throttle(carousel, 1000));
+window.addEventListener('wheel', throttle(carousel, 900));
 
 
 
