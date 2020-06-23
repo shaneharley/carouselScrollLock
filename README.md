@@ -1,4 +1,7 @@
 # carouselScrollLock
+
+## Preview: https://carousel-scroll-lock.netlify.app/
+
 Building something that:
 - Contains a fixed section
 - 'Cycles' through content within that fixed section without scrolling down the page
