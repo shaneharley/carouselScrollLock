@@ -17,20 +17,7 @@ let scrollingDown = true
 //FUNCTIONS
 /////////////////////////////////////////
 
-//this changes the classes and applies 
-const changeCarouselItemsStyles = (position) => {
 
-  //this applies the amount to transform
-  carouselWrapper.style.transform = `translateY(-${soFarTranslatedY}px)`
-
-  //remove the current active class
-  let currentActive = document.querySelector('.carouselItem h1.active')
-  currentActive.classList.remove("active")
-
-  //add the new active class
-  let newActive = document.querySelectorAll('.carouselItem h1')[position]
-  newActive.classList.add("active")
-}
 
 //function to get the height of something
 const getElementHeight = (elem) => {
@@ -40,18 +27,40 @@ const getElementHeight = (elem) => {
 }
 
 
+const toggleActiveClasses = (position) => {
+  //remove the current active
+  let currentActive = document.querySelector('.carouselItem h1.active')
+  currentActive.classList.remove("active")
+  //add the new active class
+  let newActive = document.querySelectorAll('.carouselItem h1')[position]
+  newActive.classList.add("active")
+}
+
 const moveCarousel = (position) => {
 
   let headingHeight = getElementHeight("h1")
 
   if (scrollingDown == true) {
-    soFarTranslatedY = soFarTranslatedY + headingHeight
-    changeCarouselItemsStyles(position)
+    soFarTranslatedY = Math.floor(soFarTranslatedY + headingHeight)
+
+    //this applies the amount to transform
+    carouselWrapper.style.transform = `translateY(-${soFarTranslatedY}px)`
+
+    toggleActiveClasses(position)
+
   }
 
   else {
-    soFarTranslatedY = soFarTranslatedY - headingHeight
-    changeCarouselItemsStyles(position)
+    soFarTranslatedY = Math.floor(soFarTranslatedY - headingHeight)
+    //this applies the amount to transform
+    if (currentHeading == 0) {
+      carouselWrapper.style.transform = ``
+      toggleActiveClasses(position)
+    } else {
+      carouselWrapper.style.transform = `translateY(-${soFarTranslatedY}px)`
+      toggleActiveClasses(position)
+    }
+
   }
 }
 
@@ -76,10 +85,14 @@ const carousel = () => {
   }
   else if (scrollingDown == true && carouselFixed == true) {
     currentHeading++
+
     moveCarousel(currentHeading)
+
   } else if (scrollingDown == false && currentHeading != 0 && carouselFixed) {
     currentHeading = currentHeading - 1
+
     moveCarousel(currentHeading)
+
   }
 }
 
@@ -130,7 +143,10 @@ const createObserver = () => {
 
 const handleIntersect = (entries, observer) => {
   entries.forEach((entry) => {
-    if (entry.intersectionRatio == 1) {
+    if (entry.intersectionRatio == 1 && scrollingDown == true) {
+      carouselFixed = true
+      fixedSection.classList.add("fixed")
+    } else if (entry.intersectionRatio == 1 && scrollingDown == false) {
       carouselFixed = true
       fixedSection.classList.add("fixed")
     }
