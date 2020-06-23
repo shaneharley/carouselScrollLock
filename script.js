@@ -1,109 +1,78 @@
 //GLOBAL VARIABLES
 /////////////////////////////////////////
 
-//work out what half the screen height is
-
-//And here I'm saying that we're at heading position 1 at the start
-let currentHeading = 0
-
-//saying that the carousel is currently fixed
-let carouselFixed = true
-let scrollingDown = true
-
 //finding items I'm going to call on a lot
 const fixedSection = document.querySelector("section.fullHeight")
 const headings = document.querySelectorAll('.carouselItem h1')
 const numOfHeadings = document.querySelectorAll('.carouselItem h1').length
 const carouselWrapper = document.querySelector('.carouselWrapper')
 
+//setting global variables
+let soFarTranslatedY = 0
+let currentHeading = 0
+let carouselFixed = true
+let scrollingDown = true
+
 
 //FUNCTIONS
 /////////////////////////////////////////
 
-//this is the function that loops through each item and slides it up
+//this changes the classes and applies 
+const changeCarouselItemsStyles = (position) => {
 
-let soFarTranslatedY = 0
+  //this applies the amount to transform
+  carouselWrapper.style.transform = `translateY(-${soFarTranslatedY}px)`
 
+  //remove the current active class
+  let currentActive = document.querySelector('.carouselItem h1.active')
+  currentActive.classList.remove("active")
 
-const getHeadingActualHeight = (compute) => {
-  let heading = window.getComputedStyle(document.querySelector(compute), null);
-  let height = parseFloat(heading.getPropertyValue("height"));
-  let padding = parseFloat(heading.getPropertyValue("padding-bottom"));
-  heading = height - padding
-  return heading
+  //add the new active class
+  let newActive = document.querySelectorAll('.carouselItem h1')[position]
+  newActive.classList.add("active")
 }
 
-const calculateComputedBottomPadding = (compute) => {
-  let paddingBottom = parseFloat(window.getComputedStyle(compute).paddingBottom)
-  return paddingBottom
+//function to get the height of something
+const getElementHeight = (elem) => {
+  let height = window.getComputedStyle(document.querySelector(elem));
+  height = parseFloat(height.getPropertyValue("height"));
+  return height
 }
 
 
 const moveCarousel = (position) => {
-  //this runs my calculateBottomPadding function
-  let paddingBottom = calculateComputedBottomPadding(headings[0])
 
-  //this takes the amount translated so far, adds the bottom padding, AND the height of the heading and applies that to the transform
+  let headingHeight = getElementHeight("h1")
 
   if (scrollingDown == true) {
-
-    soFarTranslatedY = soFarTranslatedY + paddingBottom + getHeadingActualHeight("h1")
-
-    //this applies the amount to transform
-    carouselWrapper.style.transform = `translateY(-${soFarTranslatedY}px)`
-
-    //add the new active class
-    let newActive = document.querySelectorAll('.carouselItem h1')[position]
-    newActive.classList.add("active")
-
-    //remove the current active
-    let currentActive = document.querySelector('.carouselItem h1.active')
-    currentActive.classList.remove("active")
-
+    soFarTranslatedY = soFarTranslatedY + headingHeight
+    changeCarouselItemsStyles(position)
   }
 
   else {
-    console.log("move Carousel ran")
-
-    soFarTranslatedY = soFarTranslatedY - paddingBottom - getHeadingActualHeight("h1")
-
-
-    //this applies the amount to transform
-    carouselWrapper.style.transform = `translateY(-${soFarTranslatedY}px)`
-
-    //remove the current active
-    let currentActive = document.querySelector('.carouselItem h1.active')
-    currentActive.classList.remove("active")
-
-    //add the new active class
-    let newActive = document.querySelectorAll('.carouselItem h1')[position]
-    newActive.classList.add("active")
-
+    soFarTranslatedY = soFarTranslatedY - headingHeight
+    changeCarouselItemsStyles(position)
   }
-
-
-
 }
 
-const toggleCarousel = () => {
+
+const unfixFixedSection = () => {
   if (carouselFixed && scrollingDown == true) {
     window.scrollTo(0, 0);
-    fixedSection.classList.toggle("fixed")
+    fixedSection.classList.remove("fixed")
     carouselFixed = false
 
   } else if (carouselFixed == false && scrollingDown == false) {
-    fixedSection.classList.toggle("fixed")
+    fixedSection.classList.add("fixed")
     carouselFixed = true
   }
 }
 
 
-
-//this is how I shift the carousel
+//this is the logic to decide whether to shift at all depending on scroll direction, whether the carousel is currently fixed
 const carousel = () => {
-  // if the position of the current heading is at the same position as the number of headings there are, then we're at the end of the list
   if ((currentHeading == numOfHeadings - 1 && scrollingDown && carouselFixed)) {
-    toggleCarousel()
+    unfixFixedSection()
   }
   else if (scrollingDown == true && carouselFixed == true) {
     currentHeading++
@@ -112,16 +81,23 @@ const carousel = () => {
     currentHeading = currentHeading - 1
     moveCarousel(currentHeading)
   }
-  // }
 }
-
-
-
-
 
 
 //EVENT LISTENERS
 /////////////////////////////////////////
+
+//this is how I'm detecting which way the user is scrolling
+window.addEventListener('wheel', (event) => {
+  let delta = event.deltaY
+  if (delta > 1) {
+    scrollingDown = true
+    console.log("scrolling down")
+  } else if (delta < 0) {
+    scrollingDown = false
+    console.log("scrolling up")
+  }
+})
 
 //this is how I slow down my scroll calls
 const throttle = (functionToRun, wait) => {
@@ -134,32 +110,7 @@ const throttle = (functionToRun, wait) => {
   }
 }
 
-
-window.addEventListener('wheel', (event) => {
-  let delta = event.deltaY
-
-  if (delta > 1) {
-    scrollingDown = true
-    console.log("scrolling down")
-  } else if (delta < 0) {
-    scrollingDown = false
-    console.log("scrolling up")
-  }
-})
-
 window.addEventListener('wheel', throttle(carousel, 900));
-
-
-
-window.addEventListener('load', () => {
-  createObserver()
-})
-
-
-
-
-
-
 
 
 // SCROLL OBSERVER
@@ -173,7 +124,6 @@ const createObserver = () => {
     rootMargin: "0px",
     threshold: 1
   }
-
   observer = new IntersectionObserver(handleIntersect, options)
   observer.observe(fixedSection)
 }
@@ -186,4 +136,8 @@ const handleIntersect = (entries, observer) => {
     }
   })
 }
+
+window.addEventListener('load', () => {
+  createObserver()
+})
 

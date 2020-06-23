@@ -1,2 +1,6 @@
 # carouselScrollLock
-Building something that allows overtake the default scroll behavior to 'step' through items in a list in a fixed type of locked scroll, kind of like a vertical carousel
+Building something that:
+- Contains a fixed section
+- Want content to 'cycle' through within that fixed section without scrolling down the page
+- Once it's at the bottom of the list, unfix the section, and allow normal scroll
+- Same in reverse for scrolling up
